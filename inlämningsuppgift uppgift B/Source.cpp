@@ -210,6 +210,10 @@ int main(int argc, char** argv)
 
 	parseBMP(rawimage, &sobel);
 
+	cout << "\nwidth: "<<sobel.width;
+	cout << "\nheight: " << sobel.height;
+	cout << "\noffset: " << sobel.offset<< endl;
+
 	convert_greyscale(sobel.width, sobel.height, rawimage + sobel.offset);
 	filter_sobel(sobel.width, sobel.height, rawimage, destimage);
 
