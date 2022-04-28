@@ -12,6 +12,7 @@
 #include <string>
 #include <fstream>
 #include <filesystem>
+#include <thread>
 
 using namespace std;
 
@@ -71,6 +72,7 @@ void parseBMP(const unsigned char* rawimage, bild* greyscale) {
 	// Plocka ut lämpliga fält ur orginalbilddatan.
 	// Exempel, plocka ut ett 4-bytes heltal från position 14:
 	//int tal = *(int *)(rawimage + 14);
+
 	greyscale->offset = *(int*)(rawimage + 10);
 	greyscale->width = *(int*)(rawimage + 18);
 	greyscale->height = *(int*)(rawimage + 22);
@@ -88,8 +90,10 @@ void convert_greyscale(int width, int height, unsigned char* pixels) {
 		int R = *(pixels + 2);
 		int G = *(pixels + 1);
 		int B = *(pixels);
-		int Y = 0.2126 * R + 0.7152 * G + 0.0722 * B;
-
+		int Y = 0.2126 * R + 0.7152 * G + 0.0722 * B;/*
+		cout << "\nPixel: " << *pixels << "\n"; //PRINTAR UT PIXLAR
+		cout << "\nPixel + 1: " << *pixels + 1 << "\n"; //PRINTAR UT PIXLAR
+		cout << "\nPixel + 2: " << *pixels + 2 << "\n"; //PRINTAR UT PIXLAR*/
 		*pixels = Y;
 		*(pixels + 1) = Y;
 		*(pixels + 2) = Y;
@@ -131,7 +135,7 @@ void set_pixel(unsigned char* dstpixels, int width, int row, int col, unsigned c
 // Omvandla src-bilden till en dst-bild med kanter markerade med ljusare gråskala.
 // Använder ett Sobelfilter: https://en.wikipedia.org/wiki/Sobel_operator
 //
-void filter_sobel(int width, int height, const unsigned char* greypixels, unsigned char* dstpixels) {
+void filter_sobel(int start, int stop, int width, int height, const unsigned char* greypixels, unsigned char* dstpixels) {
 	int sobelX[3][3] = {
 		{ -1, 0, 1 },
 		{ -2, 0, 2 },
@@ -210,20 +214,49 @@ int main(int argc, char** argv)
 
 	parseBMP(rawimage, &sobel);
 
-	cout << "\nwidth: "<<sobel.width;
-	cout << "\nheight: " << sobel.height;
-	cout << "\noffset: " << sobel.offset<< endl;
-
-	convert_greyscale(sobel.width, sobel.height, rawimage + sobel.offset);
-	filter_sobel(sobel.width, sobel.height, rawimage, destimage);
-
 	cout << "Konverterar till gråskala och kör sobelfiltret..." << endl;
 	LARGE_INTEGER startcount, stopcount, frequency;
 	QueryPerformanceFrequency(&frequency);
 	QueryPerformanceCounter(&startcount);
 
 	convert_greyscale(sobel.width, sobel.height, rawimage + sobel.offset);
-	filter_sobel(sobel.width, sobel.height, rawimage, destimage);
+
+	int totalrader = sobel.height - 2;
+	int trådar = 6;
+	int rpt = (totalrader / trådar);
+
+	thread t1(filter_sobel, 1, rpt + 1, sobel.width, sobel.height, rawimage, destimage);
+	thread t2(filter_sobel, rpt + 1, rpt * 2 + 1, sobel.width, sobel.height, rawimage, destimage);
+	thread t3(filter_sobel, rpt * 2 + 1, rpt * 3 + 1, sobel.width, sobel.height, rawimage, destimage);
+	thread t4(filter_sobel, rpt * 3 + 1, sobel.height - 1, sobel.width, sobel.height, rawimage, destimage);
+	thread t5(filter_sobel, rpt*4+1, rpt*5+1, sobel.width, sobel.height, rawimage, destimage);
+	thread t6(filter_sobel, rpt*5+1, sobel.height - 1, sobel.width, sobel.height, rawimage, destimage);
+	/*thread t7(filter_sobel, rpt*6+1, rpt*7+1, sobel.width, sobel.height, rawimage, destimage);
+	thread t8(filter_sobel, rpt * 7 + 1, sobel.height - 1, sobel.width, sobel.height, rawimage, destimage);
+	thread t9(filter_sobel, rpt * 8 + 1, rpt * 9 + 1, sobel.width, sobel.height, rawimage, destimage);
+	thread t10(filter_sobel, rpt * 9 + 1, rpt * 10 + 1, sobel.width, sobel.height, rawimage, destimage);
+	thread t11(filter_sobel, rpt * 10 + 1, rpt * 11 + 1, sobel.width, sobel.height, rawimage, destimage);
+	thread t12(filter_sobel, rpt * 11 + 1, rpt * 12 + 1, sobel.width, sobel.height, rawimage, destimage);
+	thread t13(filter_sobel, rpt * 12 + 1, rpt * 13 + 1, sobel.width, sobel.height, rawimage, destimage);
+	thread t14(filter_sobel, rpt * 13 + 1, rpt * 14 + 1, sobel.width, sobel.height, rawimage, destimage);
+	thread t15(filter_sobel, rpt * 14 + 1, rpt * 15 + 1, sobel.width, sobel.height, rawimage, destimage);
+	thread t16(filter_sobel, rpt*15+1, sobel.height - 1, sobel.width, sobel.height, rawimage, destimage);*/
+	t1.join();
+	t2.join();
+	t3.join();
+	t4.join();
+	t5.join();
+	t6.join();
+	/*t7.join();
+	t8.join();
+	t9.join();
+	t10.join();*/
+	//t11.join();
+	//t12.join();
+	//t13.join();
+	//t14.join();
+	//t15.join();
+	//t16.join();
 
 	QueryPerformanceCounter(&stopcount);
 	cout << "Klar!" << endl;
