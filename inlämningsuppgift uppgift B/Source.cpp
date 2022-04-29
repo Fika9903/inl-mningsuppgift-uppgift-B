@@ -221,19 +221,19 @@ int main(int argc, char** argv)
 
 	convert_greyscale(sobel.width, sobel.height, rawimage + sobel.offset);
 
-	int totalrader = sobel.height - 2;
-	int trådar = 6;
-	int rpt = (totalrader / trådar);
+	int rader = sobel.height - 2;
+	int trådar = 8;
+	int rpt = (rader / trådar);
 
 	thread t1(filter_sobel, 1, rpt + 1, sobel.width, sobel.height, rawimage, destimage);
 	thread t2(filter_sobel, rpt + 1, rpt * 2 + 1, sobel.width, sobel.height, rawimage, destimage);
 	thread t3(filter_sobel, rpt * 2 + 1, rpt * 3 + 1, sobel.width, sobel.height, rawimage, destimage);
-	thread t4(filter_sobel, rpt * 3 + 1, sobel.height - 1, sobel.width, sobel.height, rawimage, destimage);
-	thread t5(filter_sobel, rpt*4+1, rpt*5+1, sobel.width, sobel.height, rawimage, destimage);
-	thread t6(filter_sobel, rpt*5+1, sobel.height - 1, sobel.width, sobel.height, rawimage, destimage);
-	/*thread t7(filter_sobel, rpt*6+1, rpt*7+1, sobel.width, sobel.height, rawimage, destimage);
+	thread t4(filter_sobel, rpt * 3 + 1, rpt * 4 + 1, sobel.width, sobel.height, rawimage, destimage);
+	thread t5(filter_sobel, rpt * 4 + 1, rpt * 5 + 1, sobel.width, sobel.height, rawimage, destimage);
+	thread t6(filter_sobel, rpt * 5 + 1, rpt * 6 + 1, sobel.width, sobel.height, rawimage, destimage);
+	thread t7(filter_sobel, rpt * 6 + 1, rpt * 7 + 1, sobel.width, sobel.height, rawimage, destimage);
 	thread t8(filter_sobel, rpt * 7 + 1, sobel.height - 1, sobel.width, sobel.height, rawimage, destimage);
-	thread t9(filter_sobel, rpt * 8 + 1, rpt * 9 + 1, sobel.width, sobel.height, rawimage, destimage);
+	/*thread t9(filter_sobel, rpt * 8 + 1, rpt * 9 + 1, sobel.width, sobel.height, rawimage, destimage);
 	thread t10(filter_sobel, rpt * 9 + 1, rpt * 10 + 1, sobel.width, sobel.height, rawimage, destimage);
 	thread t11(filter_sobel, rpt * 10 + 1, rpt * 11 + 1, sobel.width, sobel.height, rawimage, destimage);
 	thread t12(filter_sobel, rpt * 11 + 1, rpt * 12 + 1, sobel.width, sobel.height, rawimage, destimage);
@@ -247,9 +247,9 @@ int main(int argc, char** argv)
 	t4.join();
 	t5.join();
 	t6.join();
-	/*t7.join();
+	t7.join();
 	t8.join();
-	t9.join();
+	/*t9.join();
 	t10.join();*/
 	//t11.join();
 	//t12.join();
