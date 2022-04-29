@@ -1,9 +1,9 @@
 // kantfilter.cpp, Thomas Lundqvist 2019-2022, Use freely!
 //
-// OBS: ej färdigt, skriv färdigt denna!
+// OBS: ej fÃ¤rdigt, skriv fÃ¤rdigt denna!
 //
-// Använder filesystem från C++17 standardarden
-// Eventuellt behöver man ställa in detta i projektinställningarna
+// AnvÃ¤nder filesystem frÃ¥n C++17 standardarden
+// Eventuellt behÃ¶ver man stÃ¤lla in detta i projektinstÃ¤llningarna
 // (general properties, c++ language standard)
 
 #include <Windows.h>
@@ -17,7 +17,7 @@
 using namespace std;
 
 //
-// Anropa denna för att enkelt kunna få åäö rätt utskriva (Windows)
+// Anropa denna fÃ¶r att enkelt kunna fÃ¥ Ã¥Ã¤Ã¶ rÃ¤tt utskriva (Windows)
 //
 void setWesternEuropeanCodePage() {
 	SetConsoleOutputCP(1252);
@@ -25,7 +25,7 @@ void setWesternEuropeanCodePage() {
 }
 
 //
-// Hjälpfunktion för hexdump. Bra för felsökning.
+// HjÃ¤lpfunktion fÃ¶r hexdump. Bra fÃ¶r felsÃ¶kning.
 // Skriv ut en hexdump av alla bytes mellan [start, start+maxbytes-1]
 //
 void hexdump(const unsigned char* start, int maxbytes) {
@@ -56,34 +56,32 @@ void hexdump(const unsigned char* start, int maxbytes) {
 }
 
 struct bild {
-	int offset;
-	int width;
-	int height;
+	int offset, width, height;
 };
 
-// Förslag på funktion: parseBMP()
-// Kan vara proffsigt med någon slags funktion som plockar ut rätt saker från rådatan.
-// BMP-formatet är rätt bra beskrivet på:
+// FÃ¶rslag pÃ¥ funktion: parseBMP()
+// Kan vara proffsigt med nÃ¥gon slags funktion som plockar ut rÃ¤tt saker frÃ¥n rÃ¥datan.
+// BMP-formatet Ã¤r rÃ¤tt bra beskrivet pÃ¥:
 //   https://en.wikipedia.org/wiki/BMP_file_format
-// Filerna använder BITMAPV5HEADER och alla pixlar lagras som 3 bytes i ordningen BGR.
-// Varje färg Röd, Grön eller Blå är alltså 8-bitar (0-255) som talar om styrkan på färgen.
+// Filerna anvÃ¤nder BITMAPV5HEADER och alla pixlar lagras som 3 bytes i ordningen BGR.
+// Varje fÃ¤rg RÃ¶d, GrÃ¶n eller BlÃ¥ Ã¤r alltsÃ¥ 8-bitar (0-255) som talar om styrkan pÃ¥ fÃ¤rgen.
 // 
 void parseBMP(const unsigned char* rawimage, bild* greyscale) {
-	// Plocka ut lämpliga fält ur orginalbilddatan.
-	// Exempel, plocka ut ett 4-bytes heltal från position 14:
+	// Plocka ut lÃ¤mpliga fÃ¤lt ur orginalbilddatan.
+	// Exempel, plocka ut ett 4-bytes heltal frÃ¥n position 14:
 	//int tal = *(int *)(rawimage + 14);
 
 	greyscale->offset = *(int*)(rawimage + 10);
 	greyscale->width = *(int*)(rawimage + 18);
 	greyscale->height = *(int*)(rawimage + 22);
 
-	// (obs: osäker kod egentligen, vi litar då på att int är 4 bytes och 
-	//  att maskinen är little endian precis som BMP-formatet använder)
+	// (obs: osÃ¤ker kod egentligen, vi litar dÃ¥ pÃ¥ att int Ã¤r 4 bytes och 
+	//  att maskinen Ã¤r little endian precis som BMP-formatet anvÃ¤nder)
 	// Returnera allt intressant i en struct eller i globala variabler.
 }
 
 //
-// Gör om alla färgpixlar till gråskala. Spara över i samma buffert eller till en ny bildbuffert.
+// GÃ¶r om alla fÃ¤rgpixlar till grÃ¥skala. Spara Ã¶ver i samma buffert eller till en ny bildbuffert.
 //
 void convert_greyscale(int width, int height, unsigned char* pixels) {
 	for (int i = 0; i < width * height; i++) {
@@ -101,24 +99,24 @@ void convert_greyscale(int width, int height, unsigned char* pixels) {
 	}
 	// eller kanske:
 	// void convert_greyscale(int width, int height, const unsigned char *srcpixels, unsigned char *dstpixels) {
-		// Finns olika sätt, välj ett:
-		// 1. sätt färgerna R och B till samma som G (grönt är viktigast för oss människor)
-		// 2. eller använd en proffsigare formel (https://en.wikipedia.org/wiki/Grayscale#Converting_color_to_grayscale)
+		// Finns olika sÃ¤tt, vÃ¤lj ett:
+		// 1. sÃ¤tt fÃ¤rgerna R och B till samma som G (grÃ¶nt Ã¤r viktigast fÃ¶r oss mÃ¤nniskor)
+		// 2. eller anvÃ¤nd en proffsigare formel (https://en.wikipedia.org/wiki/Grayscale#Converting_color_to_grayscale)
 		//    Y = 0.2126 * R + 0.7152 * G + 0.0722 * B
 }
 
 //
-// Hälpfunktion till sobelfiltret.
-// Returnera pixelvärdet på rad "row" (y) och kolumn "col" (x).
-// Antag att greypixels ska peka på första byten i första pixeln
+// HÃ¤lpfunktion till sobelfiltret.
+// Returnera pixelvÃ¤rdet pÃ¥ rad "row" (y) och kolumn "col" (x).
+// Antag att greypixels ska peka pÃ¥ fÃ¶rsta byten i fÃ¶rsta pixeln
 //
 unsigned char get_pixel(const unsigned char* greypixels, int width, int row, int col) {
 	int pixel = width * row + col;
 	return *(greypixels + pixel * 3);
 }
 //
-// Hälpfunktion till sobelfiltret.
-// Skriv nytt pixelvärdet på rad "row" (y) och kolumn "col" (x).
+// HÃ¤lpfunktion till sobelfiltret.
+// Skriv nytt pixelvÃ¤rdet pÃ¥ rad "row" (y) och kolumn "col" (x).
 //
 void set_pixel(unsigned char* dstpixels, int width, int row, int col, unsigned char newval) {
 	int pix = width * row + col;
@@ -126,14 +124,14 @@ void set_pixel(unsigned char* dstpixels, int width, int row, int col, unsigned c
 	*(dstpixels + pix * 3 + 1) = newval;
 	*(dstpixels + pix * 3 + 2) = newval;
 
-	// Bör skriva alla färgkomponenter R, G, B till samma "newval"
-	// (om dstpixels är en RGB-bild)
+	// BÃ¶r skriva alla fÃ¤rgkomponenter R, G, B till samma "newval"
+	// (om dstpixels Ã¤r en RGB-bild)
 }
 
 
 //
-// Omvandla src-bilden till en dst-bild med kanter markerade med ljusare gråskala.
-// Använder ett Sobelfilter: https://en.wikipedia.org/wiki/Sobel_operator
+// Omvandla src-bilden till en dst-bild med kanter markerade med ljusare grÃ¥skala.
+// AnvÃ¤nder ett Sobelfilter: https://en.wikipedia.org/wiki/Sobel_operator
 //
 void filter_sobel(int start, int stop, int width, int height, const unsigned char* greypixels, unsigned char* dstpixels) {
 	int sobelX[3][3] = {
@@ -157,7 +155,7 @@ void filter_sobel(int start, int stop, int width, int height, const unsigned cha
 			for (int sx = 0; sx < 3; sx++)
 				for (int sy = 0; sy < 3; sy++) {
 					sumX += sobelX[sy][sx] * get_pixel(greypixels, width, r + sy - 1, c + sx - 1);
-					// Alternativ till get_pixel() är att ha någon fiffig array direkt. T ex:
+					// Alternativ till get_pixel() Ã¤r att ha nÃ¥gon fiffig array direkt. T ex:
 					//   sumX += sobelX[sy][sx] * pixel[r + sy - 1][c + sx - 1].G;
 				}
 			// Vertical convolution
@@ -172,7 +170,7 @@ void filter_sobel(int start, int stop, int width, int height, const unsigned cha
 			if (sum > 255)
 				sum = 255;
 			set_pixel(dstpixels, width, r, c, sum);
-			// Alternativ till set_pixel är att ha någon fiffig array. T ex:
+			// Alternativ till set_pixel Ã¤r att ha nÃ¥gon fiffig array. T ex:
 			//   dest_pixel[r][c].R = (unsigned char)sum;
 			//   dest_pixel[r][c].G = (unsigned char)sum;
 			//   dest_pixel[r][c].B = (unsigned char)sum;
@@ -186,35 +184,35 @@ int main(int argc, char** argv)
 	bild sobel;
 
 	if (argc < 3) {
-		cerr << "Ange infil och utfil som två argument!" << endl;
+		cerr << "Ange infil och utfil som tvÃ¥ argument!" << endl;
 		return 1;
 	}
-	cout << "Läser från " << argv[1] << endl;
+	cout << "LÃ¤ser frÃ¥n " << argv[1] << endl;
 	cout << "Skriver till: " << argv[2] << endl;
 
-	// Exempel på filläsning och skrivning, man kan ha bättre felhantering!
+	// Exempel pÃ¥ fillÃ¤sning och skrivning, man kan ha bÃ¤ttre felhantering!
 	unsigned infil_size = (unsigned)filesystem::file_size(argv[1]);
 	cout << "Storlek: " << infil_size << " bytes" << endl << endl;
 	unsigned char* rawimage = new unsigned char[infil_size];
 
-	// Läs alla bytes. Notera "binary" här är viktigt.
+	// LÃ¤s alla bytes. Notera "binary" hÃ¤r Ã¤r viktigt.
 	ifstream infil(argv[1], fstream::binary);
 	infil.read((char*)rawimage, infil_size);
 	infil.close();
 
-	cout << endl << "Hexdump av bildfilen (för debuggning):" << endl;
+	cout << endl << "Hexdump av bildfilen (fÃ¶r debuggning):" << endl;
 	hexdump(rawimage, 200);
 	cout << endl;
 
-	// Gör en exakt kopia till destimage så följer all data i bildhuvudet
-	// med automatiskt. Själva pixlarna ska skrivas över av sobelfiltret
+	// GÃ¶r en exakt kopia till destimage sÃ¥ fÃ¶ljer all data i bildhuvudet
+	// med automatiskt. SjÃ¤lva pixlarna ska skrivas Ã¶ver av sobelfiltret
 	// senare.
 	unsigned char* destimage = new unsigned char[infil_size];
 	memcpy(destimage, rawimage, infil_size);
 
 	parseBMP(rawimage, &sobel);
 
-	cout << "Konverterar till gråskala och kör sobelfiltret..." << endl;
+	cout << "Konverterar till grÃ¥skala och kÃ¶r sobelfiltret..." << endl;
 	LARGE_INTEGER startcount, stopcount, frequency;
 	QueryPerformanceFrequency(&frequency);
 	QueryPerformanceCounter(&startcount);
@@ -222,8 +220,8 @@ int main(int argc, char** argv)
 	convert_greyscale(sobel.width, sobel.height, rawimage + sobel.offset);
 
 	int rader = sobel.height - 2;
-	int trådar = 8;
-	int rpt = (rader / trådar);
+	int trÃ¥dar = 8;
+	int rpt = (rader / trÃ¥dar);
 
 	thread t1(filter_sobel, 1, rpt + 1, sobel.width, sobel.height, rawimage, destimage);
 	thread t2(filter_sobel, rpt + 1, rpt * 2 + 1, sobel.width, sobel.height, rawimage, destimage);
@@ -265,7 +263,7 @@ int main(int argc, char** argv)
 	cout << "Diff: " << stopcount.QuadPart - startcount.QuadPart << endl;
 	cout << "Tid: " << (double)(stopcount.QuadPart - startcount.QuadPart) / frequency.QuadPart * 1000 << " ms" << endl;
 
-	// Skriv destimage som nu är uppdaterad med nya pixelvärden
+	// Skriv destimage som nu Ã¤r uppdaterad med nya pixelvÃ¤rden
 	ofstream utfil(argv[2], fstream::binary);
 	utfil.write((char*)destimage, infil_size);
 	utfil.close();
